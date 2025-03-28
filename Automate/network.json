@@ -1,0 +1,221 @@
+{
+    "AS": [
+        {
+            "number": "100",
+            "routers": [
+                {
+                    "id": "1",
+                    "hostName": "PE1",
+                    "connections": [
+                        {
+                            "router": "2",
+                            "interface": "1",
+                            "ospfArea": "0"
+                        },
+                        {
+                            "router": "5",
+                            "interface": "2",
+                            "ospfArea": ""
+                        },
+                        {
+                            "router": "6",
+                            "interface": "3",
+                            "ospfArea": ""
+                        }
+                    ],
+                    "bgpNeighbors": [
+                        "2.2.2.2",
+                        "3.3.3.3",
+                        "4.4.4.4",
+                        "5.5.5.5",
+                        "6.6.6.6"
+                    ]
+                },
+                {
+                    "id": "2",
+                    "hostName": "P1",
+                    "connections": [
+                        {
+                            "router": "1",
+                            "interface": "1",
+                            "ospfArea": "0"
+                        },
+                        {
+                            "router": "3",
+                            "interface": "2",
+                            "ospfArea": "0"
+                        }
+                    ],
+                    "bgpNeighbors": [
+                        "1.1.1.1",
+                        "3.3.3.3",
+                        "4.4.4.4"
+                    ]
+                },                
+                {
+                    "id": "3",
+                    "hostName": "P2",
+                    "connections": [
+                        {
+                            "router": "2",
+                            "interface": "1",
+                            "ospfArea": "0"
+                        },
+                        {
+                            "router": "4",
+                            "interface": "2",
+                            "ospfArea": "0"
+                        }
+                    ],
+                    "bgpNeighbors": [
+                        "1.1.1.1",
+                        "2.2.2.2",
+                        "4.4.4.4"
+                    ]
+                },
+                {
+                    "id": "4",
+                    "hostName": "PE2",
+                    "connections": [
+                        {
+                            "router": "3",
+                            "interface": "1",
+                            "ospfArea": "0"
+                        },
+                        {
+                            "router": "7",
+                            "interface": "2",
+                            "ospfArea": ""
+                        },
+                        {
+                            "router": "8",
+                            "interface": "3",
+                            "ospfArea": ""
+                        }
+                    ],
+                    "bgpNeighbors": [
+                        "1.1.1.1",
+                        "2.2.2.2",
+                        "3.3.3.3",
+                        "7.7.7.7",
+                        "8.8.8.8"
+                    ]
+                }
+            ]
+        },
+        {
+            "number": "200",
+            "routers": [
+                {
+                    "id": "5",
+                    "hostName": "CE1",
+                    "connections": [
+                        {
+                            "router": "1",
+                            "interface": "2",
+                            "ospfArea": ""
+                        }
+                    ],
+                    "bgpNeighbors": [
+                        "1.1.1.1"
+                    ]
+                }
+            ]
+        },
+        {
+            "number": "300",
+            "routers": [
+                {
+                    "id": "6",
+                    "hostName": "CE2",
+                    "connections": [
+                        {
+                            "router": "1",
+                            "interface": "3",
+                            "ospfArea": ""
+                        }
+                    ],
+                    "bgpNeighbors": [
+                        "1.1.1.1"
+                    ]
+                }
+            ]
+        },
+        {
+            "number": "400",
+            "routers": [
+                {
+                    "id": "7",
+                    "hostName": "CE3",
+                    "connections": [
+                        {
+                            "router": "4",
+                            "interface": "2",
+                            "ospfArea": ""
+                        }
+                    ],
+                    "bgpNeighbors": [
+                        "4.4.4.4"
+                    ]
+                }
+            ]
+        },
+        {
+            "number": "500",
+            "routers": [
+                {
+                    "id": "8",
+                    "hostName": "CE4",
+                    "connections": [
+                        {
+                            "router": "4",
+                            "interface": "3",
+                            "ospfArea": ""
+                        }
+                    ],
+                    "bgpNeighbors": [
+                        "4.4.4.4"
+                    ]
+                }
+            ]
+        }
+    ],
+    "VRFs": [
+        {
+            "id":"1",
+            "link":[
+                {
+                    "PEid": "1",
+                    "interface": "2"
+                },
+                {
+                    "PEid": "4",
+                    "interface": "2"
+                }
+            ]
+        },
+        {
+            "id":"2",
+            "link":[
+                {
+                    "PEid": "1",
+                    "interface": "3"
+                },
+                {
+                    "PEid": "4",
+                    "interface": "3"
+                }
+            ]
+        }
+    ],
+    "routerMap": {
+        "PE1": "1",
+        "P1": "2",
+        "P2": "3",
+        "PE2": "4",
+        "CE1": "5",
+        "CE2": "6",
+        "CE3": "7",
+        "CE4": "8"
+    }
+}

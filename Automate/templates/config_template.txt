@@ -1,0 +1,173 @@
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+hostname {{ router.hostname }}
+!
+boot-start-marker
+boot-end-marker
+!
+!
+{%for vrf in router.vrfs%}
+vrf definition {{vrf.site}}
+ rd {{vrf.rd_As + ":" + vrf.id}}
+ route-target export {{vrf.target_As + ":" + vrf.id}}
+ route-target import {{vrf.target_As + ":" + vrf.id}}
+ !
+ address-family ipv4
+ exit-address-family
+!
+{%endfor%}
+!
+no aaa new-model
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+no ipv6 cef
+!
+!
+{%if router.hostname.startswith("P")%}
+mpls label protocol ldp
+{%endif%}
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+{% if router.loopback %}
+interface {{ router.loopback.name }}
+ ip address {{ router.loopback.address }} 255.255.255.255
+ {%if router.ospf%}
+ ip ospf 1 area {{ router.loopback.ospfArea }}
+ {%endif%}
+!
+{%endif%}
+interface FastEthernet0/0
+ no ip address
+ shutdown
+ duplex full
+!
+{% for interface in router.interfaces %}
+interface {{ interface.name }}
+{%if interface.vrf_site%}
+ vrf forwarding {{interface.vrf_site}}
+{%endif%}
+ ip address {{ interface.address }} 255.255.255.0
+ {%if router.ospf%}
+ ip ospf 1 area {{ interface.ospfArea }}
+ {%endif%}
+ negotiation auto
+ {% if router.hostname.startswith("P") and interface.neighbor[0].startswith("P") %}
+ mpls ip
+ {%endif%}
+!
+{% endfor %}
+{% if router.ospf %}
+router ospf 1
+ router-id {{ router.loopback.address }}
+ network {{ router.loopback.address }} 0.0.0.0 area 0
+ {% for interface in router.interfaces %}
+ network {{ interface.addressnet}} 0.0.0.255 area 0
+ {% endfor %}
+{%endif%}
+!
+{% if router.bgp %}
+router bgp {{ router.bgp.number }}
+ bgp router-id {{ router.loopback.address }}
+ bgp log-neighbor-changes
+{%if router.hostname.startswith("CE") %}
+ network {{ router.loopback.address }} mask 255.255.255.255
+{% for interface in router.interfaces %}
+ network 10.1.{{ interface.prefix }}.0 mask 255.255.255.0
+ neighbor 10.1.{{ interface.prefix }}.{{ interface.neighbor[1] }} remote-as 100
+ {%if router.hostname.startswith("PE")%}
+ neighbor 10.1.{{ interface.prefix }}.{{ interface.neighbor[1] }} remote-as {{ router.bgp.number }}
+{%endif%}
+{%endfor%}
+ {%endif%}
+ {% for neighbor in router.bgp.neighbors %}
+ {%if router.hostname.startswith("P")%}
+ {%if router.bgp.number == neighbor.AS %}
+ neighbor {{ neighbor.loopback }} remote-as {{ neighbor.AS }}
+ neighbor {{ neighbor.loopback }} update-source Loopback0
+ {%else%}
+ neighbor {{ neighbor.ip }} remote-as {{ neighbor.AS }}
+ neighbor {{ neighbor.ip }} update-source Loopback0
+ {%endif%}
+{%endif%}
+ {% endfor %}
+!
+{%if router.hostname.startswith("P")%}
+address-family vpnv4
+ {% for neighbor in router.bgp.neighbors %}
+{%if router.bgp.number == neighbor.AS %}
+ neighbor {{ neighbor.loopback }} activate
+{%if router.hostname[1] == "E"%}
+ neighbor {{ neighbor.loopback }} send-community extended
+{%endif%}
+{%endif%}
+ {% endfor %}
+exit-address-family
+{%endif%}
+!
+{% endif %}
+{%for vrf in router.vrfs%}
+ address-family ipv4 vrf {{vrf.site}}
+  redistribute connected
+  neighbor 10.1.{{ vrf.interface.prefix }}.{{vrf.interface.neighbor[1]}} remote-as {{vrf.rd_As}}
+  neighbor 10.1.{{ vrf.interface.prefix }}.{{vrf.interface.neighbor[1]}} activate
+ exit-address-family
+!
+{%endfor%}
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line vty 0 4
+ login
+!
+!
+end
